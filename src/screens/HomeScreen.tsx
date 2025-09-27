@@ -49,14 +49,24 @@ export default function HomeScreen() {
   const handleWhatsApp = (property: Property) => {
     const message = `Olá! Tenho interesse no imóvel: ${property.title} - ${property.location}. Valor: R$ ${property.price}/mês`;
     const phone = property.agent.phone.replace(/\D/g, '');
-    const url = `whatsapp://send?phone=55${phone}&text=${encodeURIComponent(message)}`;
     
-    Linking.canOpenURL(url).then((supported) => {
+    // Try WhatsApp URL scheme first
+    const whatsappUrl = `whatsapp://send?phone=55${phone}&text=${encodeURIComponent(message)}`;
+    
+    Linking.canOpenURL(whatsappUrl).then((supported) => {
       if (supported) {
-        Linking.openURL(url);
+        return Linking.openURL(whatsappUrl);
       } else {
-        Alert.alert('WhatsApp não encontrado', 'Por favor, instale o WhatsApp para continuar.');
+        // Fallback to web WhatsApp for iOS
+        const webUrl = `https://wa.me/55${phone}?text=${encodeURIComponent(message)}`;
+        return Linking.openURL(webUrl);
       }
+    }).catch(() => {
+      // Final fallback - open web WhatsApp
+      const webUrl = `https://wa.me/55${phone}?text=${encodeURIComponent(message)}`;
+      Linking.openURL(webUrl).catch(() => {
+        Alert.alert('Erro', 'Não foi possível abrir o WhatsApp. Verifique se está instalado.');
+      });
     });
   };
 
