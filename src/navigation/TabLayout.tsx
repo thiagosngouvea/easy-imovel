@@ -1,6 +1,7 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Tabs } from 'expo-router';
+import { Link, Tabs } from 'expo-router';
 import React from 'react';
+import { Pressable } from 'react-native';
 
 import Colors from '@/constants/Colors';
 import { useClientOnlyValue } from '@/src/components/useClientOnlyValue';
@@ -28,17 +29,29 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Explorar',
-          tabBarIcon: ({ color }) => <TabBarIcon name="search" color={color} />,
-          headerShown: false,
+          title: 'Home',
+          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+          headerRight: () => (
+            <Link href="/modal" asChild>
+              <Pressable>
+                {({ pressed }) => (
+                  <FontAwesome
+                    name="info-circle"
+                    size={25}
+                    color={Colors[colorScheme ?? 'light'].text}
+                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
+                  />
+                )}
+              </Pressable>
+            </Link>
+          ),
         }}
       />
       <Tabs.Screen
         name="details"
         options={{
-          title: 'Favoritos',
-          tabBarIcon: ({ color }) => <TabBarIcon name="heart" color={color} />,
-          headerShown: false,
+          title: 'Details',
+          tabBarIcon: ({ color }) => <TabBarIcon name="list" color={color} />,
         }}
       />
     </Tabs>
