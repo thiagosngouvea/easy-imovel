@@ -7,10 +7,11 @@ import React, { useEffect, useState } from 'react';
 import { Alert, Dimensions, Linking, StatusBar, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import FilterDrawer from '../components/FilterDrawer';
 import Header from '../components/Header';
 import PropertyCard from '../components/PropertyCard';
 import { usePropertyStore } from '../hooks/usePropertyStore';
-import { Property } from '../types/Property';
+import { Property, PropertyFilters } from '../types/Property';
 
 const { height: screenHeight } = Dimensions.get('window');
 
@@ -29,6 +30,8 @@ export default function HomeScreen() {
   } = usePropertyStore();
 
   const [showActions, setShowActions] = useState(true);
+  const [showFilterDrawer, setShowFilterDrawer] = useState(false);
+  const [filters, setFilters] = useState<PropertyFilters>({});
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -85,6 +88,12 @@ export default function HomeScreen() {
         { text: 'Sim', onPress: resetStack },
       ]
     );
+  };
+
+  const handleApplyFilters = (newFilters: PropertyFilters) => {
+    setFilters(newFilters);
+    // Aqui você pode implementar a lógica de filtrar as propriedades
+    console.log('Filtros aplicados:', newFilters);
   };
 
   if (isLoading) {
@@ -163,8 +172,10 @@ export default function HomeScreen() {
         subtitle={`${remainingCount} imóveis restantes`}
         showFavoriteButton={true}
         showSettingsButton={true}
+        showFilterButton={true}
         onSettingsPress={() => setShowActions(!showActions)}
         onFavoritePress={() => {/* Navigate to favorites */}}
+        onFilterPress={() => setShowFilterDrawer(true)}
       />
 
       {/* Card Stack */}
@@ -273,6 +284,14 @@ export default function HomeScreen() {
           ← Deslize para rejeitar • Deslize para curtir →
         </Text>
       </YStack> */}
+
+      {/* Filter Drawer */}
+      <FilterDrawer
+        isOpen={showFilterDrawer}
+        onClose={() => setShowFilterDrawer(false)}
+        filters={filters}
+        onApplyFilters={handleApplyFilters}
+      />
     </View>
   );
 }

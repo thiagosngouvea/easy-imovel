@@ -1,11 +1,17 @@
 import { create } from 'zustand';
 
+export type UserType = 'client' | 'agent' | 'agency';
+
 export interface User {
   id: string;
   name: string;
   email: string;
   city: string;
   state: string;
+  userType: UserType;
+  company?: string; // Para agentes e imobiliárias
+  creci?: string; // Para agentes
+  phone?: string;
 }
 
 interface AuthState {
@@ -13,7 +19,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string, city: string, state: string) => Promise<boolean>;
+  register: (name: string, email: string, password: string, city: string, state: string, userType: UserType, company?: string, creci?: string, phone?: string) => Promise<boolean>;
   logout: () => void;
   setLoading: (loading: boolean) => void;
 }
@@ -36,7 +42,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         name: 'Usuário Teste',
         email,
         city: 'São Paulo',
-        state: 'SP'
+        state: 'SP',
+        userType: 'client'
       };
       
       set({ 
@@ -52,7 +59,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  register: async (name: string, email: string, password: string, city: string, state: string) => {
+  register: async (name: string, email: string, password: string, city: string, state: string, userType: UserType, company?: string, creci?: string, phone?: string) => {
     set({ isLoading: true });
     
     try {
@@ -64,7 +71,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         name,
         email,
         city,
-        state
+        state,
+        userType,
+        company,
+        creci,
+        phone
       };
       
       set({ 

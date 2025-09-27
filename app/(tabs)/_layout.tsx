@@ -69,6 +69,26 @@ export default function TabLayout() {
           },
         }}
       />
+      <Tabs.Screen
+        name="menu"
+        options={{
+          title: 'Menu',
+          tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
+          headerShown: false,
+          tabBarLabel: 'Menu',
+          tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: "400",
+            marginBottom: Platform.OS === "ios" ? 15 : 0,
+          },
+          tabBarActiveBackgroundColor: "#ffffff",
+          tabBarActiveTintColor: "#FB923C",
+          tabBarInactiveTintColor: "#A0A0A0",
+          tabBarIconStyle: {
+            marginBottom: 0,
+          },
+        }}
+      />
     </Tabs>
   );
 }

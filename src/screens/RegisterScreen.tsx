@@ -7,12 +7,18 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StatusBar, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuthStore } from '../hooks/useAuthStore';
+import { useAuthStore, UserType } from '../hooks/useAuthStore';
 
 const BRAZILIAN_STATES = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
   'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN',
   'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+];
+
+const USER_TYPES = [
+  { value: 'client' as UserType, label: 'Cliente', description: 'Procuro imóveis para alugar', icon: 'person-outline' },
+  { value: 'agent' as UserType, label: 'Corretor', description: 'Sou corretor de imóveis', icon: 'briefcase-outline' },
+  { value: 'agency' as UserType, label: 'Imobiliária', description: 'Represento uma imobiliária', icon: 'business-outline' },
 ];
 
 export default function RegisterScreen() {
@@ -22,13 +28,27 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
+  const [userType, setUserType] = useState<UserType>('client');
+  const [company, setCompany] = useState('');
+  const [creci, setCreci] = useState('');
+  const [phone, setPhone] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { register, isLoading } = useAuthStore();
 
   const handleRegister = async () => {
     if (!name || !email || !password || !confirmPassword || !city || !state) {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos');
+      Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios');
+      return;
+    }
+
+    if (userType !== 'client' && !company) {
+      Alert.alert('Erro', 'Por favor, informe o nome da empresa');
+      return;
+    }
+
+    if (userType === 'agent' && !creci) {
+      Alert.alert('Erro', 'Por favor, informe o número do CRECI');
       return;
     }
 
@@ -42,7 +62,7 @@ export default function RegisterScreen() {
       return;
     }
 
-    const success = await register(name, email, password, city, state);
+    const success = await register(name, email, password, city, state, userType, company, creci, phone);
     
     if (success) {
       router.replace('/(tabs)');
@@ -110,6 +130,55 @@ export default function RegisterScreen() {
 
             {/* Formulário */}
             <YStack gap="$4" marginTop="$4">
+              {/* Tipo de Usuário */}
+              <YStack gap="$3">
+                <Text fontSize="$4" fontWeight="600" color="$color">
+                  Você é:
+                </Text>
+                <YStack gap="$2">
+                  {USER_TYPES.map((type) => (
+                    <TouchableOpacity
+                      key={type.value}
+                      onPress={() => setUserType(type.value)}
+                    >
+                      <XStack
+                        alignItems="center"
+                        padding="$4"
+                        borderRadius="$4"
+                        borderWidth={1}
+                        borderColor={userType === type.value ? "$orange9" : "$borderColor"}
+                        backgroundColor={userType === type.value ? "$orange1" : "$background"}
+                        gap="$3"
+                      >
+                        <Ionicons 
+                          name={type.icon as any} 
+                          size={24} 
+                          color={userType === type.value ? "#FB923C" : "#666"} 
+                        />
+                        <YStack flex={1}>
+                          <Text 
+                            fontSize="$4" 
+                            fontWeight="600" 
+                            color={userType === type.value ? "$orange11" : "$color"}
+                          >
+                            {type.label}
+                          </Text>
+                          <Text 
+                            fontSize="$3" 
+                            color={userType === type.value ? "$orange10" : "$gray10"}
+                          >
+                            {type.description}
+                          </Text>
+                        </YStack>
+                        {userType === type.value && (
+                          <Ionicons name="checkmark-circle" size={20} color="#FB923C" />
+                        )}
+                      </XStack>
+                    </TouchableOpacity>
+                  ))}
+                </YStack>
+              </YStack>
+
               <YStack gap="$2">
                 <Text fontSize="$4" fontWeight="600" color="$color">
                   Nome completo
@@ -118,7 +187,7 @@ export default function RegisterScreen() {
                   size="$4"
                   placeholder="Digite seu nome completo"
                   value={name}
-                  onChangeText={(e) => setName(e.nativeEvent.text)}
+                  onChangeText={setName}
                   borderRadius="$4"
                 />
               </YStack>
@@ -131,13 +200,60 @@ export default function RegisterScreen() {
                   size="$4"
                   placeholder="Digite seu email"
                   value={email}
-                  onChangeText={(e) => setEmail(e.nativeEvent.text)}
+                  onChangeText={setEmail}
                   keyboardType="email-address"
                   autoCapitalize="none"
-                  autoCorrect={undefined}
+                  autoCorrect={false}
                   borderRadius="$4"
                 />
               </YStack>
+
+              {/* Campos específicos para agentes e imobiliárias */}
+              {userType !== 'client' && (
+                <>
+                  <YStack gap="$2">
+                    <Text fontSize="$4" fontWeight="600" color="$color">
+                      {userType === 'agent' ? 'Imobiliária/Empresa' : 'Nome da Imobiliária'}
+                    </Text>
+                    <Input
+                      size="$4"
+                      placeholder={userType === 'agent' ? 'Nome da empresa onde trabalha' : 'Nome da sua imobiliária'}
+                      value={company}
+                      onChangeText={setCompany}
+                      borderRadius="$4"
+                    />
+                  </YStack>
+
+                  {userType === 'agent' && (
+                    <YStack gap="$2">
+                      <Text fontSize="$4" fontWeight="600" color="$color">
+                        CRECI
+                      </Text>
+                      <Input
+                        size="$4"
+                        placeholder="Número do seu CRECI"
+                        value={creci}
+                        onChangeText={setCreci}
+                        borderRadius="$4"
+                      />
+                    </YStack>
+                  )}
+
+                  <YStack gap="$2">
+                    <Text fontSize="$4" fontWeight="600" color="$color">
+                      Telefone
+                    </Text>
+                    <Input
+                      size="$4"
+                      placeholder="(11) 99999-9999"
+                      value={phone}
+                      onChangeText={setPhone}
+                      keyboardType="phone-pad"
+                      borderRadius="$4"
+                    />
+                  </YStack>
+                </>
+              )}
 
               <XStack gap="$3">
                 <YStack flex={2} gap="$2">
@@ -148,7 +264,7 @@ export default function RegisterScreen() {
                     size="$4"
                     placeholder="Sua cidade"
                     value={city}
-                    onChangeText={(e) => setCity(e.nativeEvent.text)}
+                    onChangeText={setCity}
                     borderRadius="$4"
                   />
                 </YStack>
@@ -161,7 +277,7 @@ export default function RegisterScreen() {
                     size="$4"
                     placeholder="UF"
                     value={state}
-                    onChangeText={(e) => setState(e.nativeEvent.text.toUpperCase())}
+                    onChangeText={(text) => setState(text.toUpperCase())}
                     maxLength={2}
                     borderRadius="$4"
                   />
@@ -178,7 +294,7 @@ export default function RegisterScreen() {
                     size="$4"
                     placeholder="Digite sua senha"
                     value={password}
-                    onChangeText={(e) => setPassword(e.nativeEvent.text)}
+                    onChangeText={setPassword}
                     secureTextEntry={!showPassword}
                     borderRadius="$4"
                   />
@@ -210,7 +326,7 @@ export default function RegisterScreen() {
                     size="$4"
                     placeholder="Confirme sua senha"
                     value={confirmPassword}
-                    onChangeText={(e) => setConfirmPassword(e.nativeEvent.text)}
+                    onChangeText={setConfirmPassword}
                     secureTextEntry={!showConfirmPassword}
                     borderRadius="$4"
                   />

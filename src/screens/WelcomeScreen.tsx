@@ -80,7 +80,7 @@ export default function WelcomeScreen() {
           </YStack>
 
           {/* Botões */}
-          <YStack gap="$4" width="100%">
+          <YStack gap="$3" width="100%">
             <Button
               size="$5"
               backgroundColor="white"
@@ -102,6 +102,26 @@ export default function WelcomeScreen() {
               onPress={() => router.push('/register')}
             >
               Criar Conta
+            </Button>
+
+            {/* Continuar sem login */}
+            <Button
+              size="$4"
+              backgroundColor="transparent"
+              color="rgba(255,255,255,0.8)"
+              borderRadius="$6"
+              fontWeight="500"
+              onPress={() => router.push('/(tabs)')}
+              pressStyle={{
+                backgroundColor: "rgba(255,255,255,0.1)"
+              }}
+            >
+              <XStack alignItems="center" gap="$2">
+                <Ionicons name="arrow-forward-outline" size={16} color="rgba(255,255,255,0.8)" />
+                <Text color="rgba(255,255,255,0.8)" fontSize="$4">
+                  Continuar sem login
+                </Text>
+              </XStack>
             </Button>
           </YStack>
         </YStack>

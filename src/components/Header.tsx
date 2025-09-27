@@ -12,8 +12,10 @@ interface HeaderProps {
   subtitle?: string;
   showFavoriteButton?: boolean;
   showSettingsButton?: boolean;
+  showFilterButton?: boolean;
   onSettingsPress?: () => void;
   onFavoritePress?: () => void;
+  onFilterPress?: () => void;
   backgroundColor?: string;
   textColor?: string;
 }
@@ -23,8 +25,10 @@ export default function Header({
   subtitle,
   showFavoriteButton = false,
   showSettingsButton = false,
+  showFilterButton = false,
   onSettingsPress,
   onFavoritePress,
+  onFilterPress,
   backgroundColor = '$orange9',
   textColor = 'white'
 }: HeaderProps) {
@@ -42,7 +46,24 @@ export default function Header({
       borderBottomWidth={1}
       borderBottomColor="$borderColor"
     >
-      <YStack>
+      {/* Left side - Filter button */}
+      <XStack alignItems="center">
+        {showFilterButton && (
+          <Button
+            size="$3"
+            variant="outlined"
+            borderColor="rgba(255,255,255,0.3)"
+            color={textColor}
+            circular
+            onPress={onFilterPress}
+          >
+            <Ionicons name="options-outline" size={18} />
+          </Button>
+        )}
+      </XStack>
+
+      {/* Center - Title */}
+      <YStack alignItems="center">
         <Text fontSize="$6" fontWeight="bold" color={textColor}>
           {title}
         </Text>
@@ -53,13 +74,14 @@ export default function Header({
         )}
       </YStack>
 
+      {/* Right side - Settings and Favorites */}
       <XStack gap="$3">
         {showSettingsButton && (
           <Button
             size="$3"
             variant="outlined"
-            borderColor="$borderColor"
-            color="$color"
+            borderColor="rgba(255,255,255,0.3)"
+            color={textColor}
             circular
             onPress={onSettingsPress}
           >
