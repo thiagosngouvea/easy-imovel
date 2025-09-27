@@ -1,10 +1,10 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Card } from '@tamagui/card';
-import { Text } from '@tamagui/core';
-import { XStack, YStack } from '@tamagui/stacks';
-import React, { useState } from 'react';
-import { Dimensions, Image, TouchableOpacity } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Ionicons } from "@expo/vector-icons";
+import { Card } from "@tamagui/card";
+import { Text } from "@tamagui/core";
+import { XStack, YStack } from "@tamagui/stacks";
+import React, { useState } from "react";
+import { Dimensions, Image, TouchableOpacity } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   Extrapolate,
   interpolate,
@@ -12,13 +12,13 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-} from 'react-native-reanimated';
+} from "react-native-reanimated";
 
-import { Property } from '../types/Property';
-import { formatCurrency } from '../utils/formatters';
-import FireEffect from './FireEffect';
+import { Property } from "../types/Property";
+import { formatCurrency } from "../utils/formatters";
+import FireEffect from "./FireEffect";
 
-const { width: screenWidth } = Dimensions.get('window');
+const { width: screenWidth } = Dimensions.get("window");
 const CARD_WIDTH = screenWidth * 0.9;
 const SWIPE_THRESHOLD = screenWidth * 0.25;
 
@@ -36,13 +36,13 @@ const isHotProperty = (likes: number): boolean => {
   return likes >= 100;
 };
 
-export default function PropertyCard({ 
-  property, 
-  onSwipeLeft, 
-  onSwipeRight, 
+export default function PropertyCard({
+  property,
+  onSwipeLeft,
+  onSwipeRight,
   onPress,
   isBackground = false,
-  style
+  style,
 }: PropertyCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -71,7 +71,7 @@ export default function PropertyCard({
     .onUpdate((event) => {
       translateX.value = event.translationX;
       translateY.value = event.translationY * 0.1;
-      
+
       // Update opacity based on swipe distance
       const progress = Math.abs(event.translationX) / SWIPE_THRESHOLD;
       opacity.value = Math.max(0.3, 1 - progress * 0.7);
@@ -99,7 +99,7 @@ export default function PropertyCard({
         translateY.value = withSpring(0);
         opacity.value = withSpring(1);
       }
-      
+
       scale.value = withSpring(1);
     });
 
@@ -133,24 +133,25 @@ export default function PropertyCard({
   }, [property.id]);
 
   const nextImage = () => {
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === property.images.length - 1 ? 0 : prev + 1
     );
   };
 
   const prevImage = () => {
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === 0 ? property.images.length - 1 : prev - 1
     );
   };
 
   // Get the primary agent (prefer premium, fallback to first)
-  const primaryAgent = property.agents?.find(agent => agent.isPremium) || property.agents?.[0];
+  const primaryAgent =
+    property.agents?.find((agent) => agent.isPremium) || property.agents?.[0];
 
   return (
     <GestureDetector gesture={panGesture}>
       <Animated.View style={[{ width: CARD_WIDTH }, animatedStyle, style]}>
-        <TouchableOpacity 
+        <TouchableOpacity
           activeOpacity={0.95}
           onPress={() => onPress?.(property)}
           disabled={isBackground}
@@ -167,7 +168,11 @@ export default function PropertyCard({
             shadowOpacity={isBackground ? 0.05 : 0.1}
             shadowRadius={8}
             opacity={isBackground ? 0.8 : 1}
-            borderColor={isHotProperty(property.likes) ? "rgba(255, 69, 0, 0.3)" : "$borderColor"}
+            borderColor={
+              isHotProperty(property.likes)
+                ? "rgba(255, 69, 0, 0.3)"
+                : "$borderColor"
+            }
             borderWidth={isHotProperty(property.likes) ? 2 : 1}
           >
             {/* Image Section */}
@@ -175,20 +180,16 @@ export default function PropertyCard({
               <Image
                 source={{ uri: property.images[currentImageIndex] }}
                 style={{
-                  width: '100%',
+                  width: "100%",
                   height: 300,
-                  backgroundColor: '#f0f0f0',
+                  backgroundColor: "#f0f0f0",
                 }}
                 resizeMode="cover"
               />
-              
+
               {/* Hot Property Badge */}
               {isHotProperty(property.likes) && (
-                <YStack
-                  position="absolute"
-                  top={15}
-                  left={15}
-                >
+                <YStack position="absolute" top={15} left={15}>
                   <FireEffect likes={property.likes} size="medium" />
                 </YStack>
               )}
@@ -202,27 +203,27 @@ export default function PropertyCard({
                       prevImage();
                     }}
                     style={{
-                      position: 'absolute',
+                      position: "absolute",
                       left: 10,
-                      top: '50%',
-                      backgroundColor: 'rgba(0,0,0,0.5)',
+                      top: "50%",
+                      backgroundColor: "rgba(0,0,0,0.5)",
                       borderRadius: 20,
                       padding: 8,
                     }}
                   >
                     <Ionicons name="chevron-back" size={20} color="white" />
                   </TouchableOpacity>
-                  
+
                   <TouchableOpacity
                     onPress={(e) => {
                       e.stopPropagation();
                       nextImage();
                     }}
                     style={{
-                      position: 'absolute',
+                      position: "absolute",
                       right: 10,
-                      top: '50%',
-                      backgroundColor: 'rgba(0,0,0,0.5)',
+                      top: "50%",
+                      backgroundColor: "rgba(0,0,0,0.5)",
                       borderRadius: 20,
                       padding: 8,
                     }}
@@ -244,7 +245,9 @@ export default function PropertyCard({
                         height={8}
                         borderRadius={4}
                         backgroundColor={
-                          index === currentImageIndex ? 'white' : 'rgba(255,255,255,0.5)'
+                          index === currentImageIndex
+                            ? "white"
+                            : "rgba(255,255,255,0.5)"
                         }
                       />
                     ))}
@@ -257,11 +260,15 @@ export default function PropertyCard({
                 position="absolute"
                 top={15}
                 right={15}
-                backgroundColor={isHotProperty(property.likes) ? "$orange10" : "$blue10"}
+                backgroundColor={
+                  isHotProperty(property.likes) ? "$orange10" : "$blue10"
+                }
                 paddingHorizontal="$3"
                 paddingVertical="$2"
                 borderRadius="$3"
-                shadowColor={isHotProperty(property.likes) ? "#FF4500" : "transparent"}
+                shadowColor={
+                  isHotProperty(property.likes) ? "#FF4500" : "transparent"
+                }
                 shadowOffset={{ width: 0, height: 0 }}
                 shadowOpacity={0.6}
                 shadowRadius={8}
@@ -282,22 +289,26 @@ export default function PropertyCard({
                       {property.title}
                     </Text>
                     <XStack alignItems="center" gap="$2">
-                      <Ionicons name="location-outline" size={16} color="#666" />
+                      <Ionicons
+                        name="location-outline"
+                        size={16}
+                        color="#666"
+                      />
                       <Text color="$gray10" fontSize="$4">
                         {property.location}
                       </Text>
                     </XStack>
                   </YStack>
-                  
+
                   {/* Likes counter */}
                   <XStack alignItems="center" gap="$1">
-                    <Ionicons 
-                      name={property.likes >= 100 ? "heart" : "heart-outline"} 
-                      size={16} 
-                      color={property.likes >= 100 ? "#FF4500" : "#666"} 
+                    <Ionicons
+                      name={property.likes >= 100 ? "heart" : "heart-outline"}
+                      size={16}
+                      color={property.likes >= 100 ? "#FF4500" : "#666"}
                     />
-                    <Text 
-                      color={property.likes >= 100 ? "#FF4500" : "$gray10"} 
+                    <Text
+                      color={property.likes >= 100 ? "#FF4500" : "$gray10"}
                       fontSize="$3"
                       fontWeight={property.likes >= 100 ? "bold" : "normal"}
                     >
@@ -331,8 +342,43 @@ export default function PropertyCard({
                 </XStack>
               </XStack>
 
+              {/* Key Features */}
+              {property.features && property.features.length > 0 && (
+                <YStack gap="$2">
+                  <XStack flexWrap="wrap" gap="$2">
+                    {property.features.slice(0, 3).map((feature, index) => (
+                      <YStack
+                        key={index}
+                        backgroundColor="$blue2"
+                        paddingHorizontal="$3"
+                        paddingVertical="$2"
+                        borderRadius="$3"
+                      >
+                        <Text fontSize="$2" color="$blue11" fontWeight="500">
+                          {feature}
+                        </Text>
+                      </YStack>
+                    ))}
+                    {property.features.length > 3 && (
+                      <YStack
+                        backgroundColor="$gray2"
+                        paddingHorizontal="$3"
+                        paddingVertical="$2"
+                        borderRadius="$3"
+                      >
+                        <Text fontSize="$2" color="$gray11">
+                          +{property.features.length - 3} mais
+                        </Text>
+                      </YStack>
+                    )}
+                  </XStack>
+                </YStack>
+              )}
+
+              
+
               {/* Agent Info */}
-              <Card
+              {/* <Card
                 backgroundColor="$backgroundStrong"
                 padding="$3"
                 borderRadius="$3"
@@ -377,7 +423,7 @@ export default function PropertyCard({
                     </YStack>
                   </XStack>
                 </YStack>
-              </Card>
+              </Card> */}
             </YStack>
           </Card>
         </TouchableOpacity>
