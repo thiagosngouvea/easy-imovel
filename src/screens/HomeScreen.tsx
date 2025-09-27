@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@tamagui/button';
 import { Text } from '@tamagui/core';
 import { XStack, YStack } from '@tamagui/stacks';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, Dimensions, Linking, StatusBar, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -29,6 +30,7 @@ export default function HomeScreen() {
 
   const [showActions, setShowActions] = useState(true);
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   useEffect(() => {
     loadProperties();
@@ -48,7 +50,7 @@ export default function HomeScreen() {
 
   const handleWhatsApp = (property: Property) => {
     const message = `Olá! Tenho interesse no imóvel: ${property.title} - ${property.location}. Valor: R$ ${property.price}/mês`;
-    const phone = property.agent.phone.replace(/\D/g, '');
+    const phone = property.agents[0].phone.replace(/\D/g, '');
     
     // Try WhatsApp URL scheme first
     const whatsappUrl = `whatsapp://send?phone=55${phone}&text=${encodeURIComponent(message)}`;
@@ -68,6 +70,10 @@ export default function HomeScreen() {
         Alert.alert('Erro', 'Não foi possível abrir o WhatsApp. Verifique se está instalado.');
       });
     });
+  };
+
+  const handlePropertyPress = (property: Property) => {
+    router.push(`/modal?id=${property.id}`);
   };
 
   const handleReset = () => {
@@ -192,7 +198,7 @@ export default function HomeScreen() {
             property={currentProperty}
             onSwipeLeft={handleReject}
             onSwipeRight={handleLike}
-            onPress={handleWhatsApp}
+            onPress={handlePropertyPress}
             isBackground={false}
             style={{
               zIndex: 2

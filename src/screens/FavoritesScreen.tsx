@@ -24,10 +24,14 @@ export default function FavoritesScreen() {
   const router = useRouter();
 
   const handleWhatsApp = (property: Property) => {
+    // Use the first agent or a premium agent if available
+    const agent = property.agents.find(a => a.isPremium) || property.agents[0];
+    if (!agent) return;
+
     const message = `Olá! Tenho interesse no imóvel: ${property.title} - ${
       property.location
     }. Valor: ${formatCurrency(property.price)}/mês`;
-    const phone = property.agent.phone.replace(/\D/g, "");
+    const phone = agent.phone.replace(/\D/g, "");
     const url = `whatsapp://send?phone=55${phone}&text=${encodeURIComponent(
       message
     )}`;

@@ -1,3 +1,17 @@
+export interface Agent {
+  id: string;
+  name: string;
+  company: string;
+  rating: number;
+  responseTime: string;
+  phone: string;
+  isOwner?: boolean;
+  isPremium?: boolean;
+  profileImage?: string;
+  specialties?: string[];
+  experience?: string;
+}
+
 export interface Property {
   id: string;
   title: string;
@@ -9,14 +23,7 @@ export interface Property {
   images: string[];
   description: string;
   type: 'apartment' | 'house' | 'studio' | 'commercial';
-  agent: {
-    name: string;
-    company: string;
-    rating: number;
-    responseTime: string;
-    phone: string;
-    isOwner?: boolean;
-  };
+  agents: Agent[]; // Mudança: agora é um array de agentes
   features: string[];
   coordinates?: {
     latitude: number;

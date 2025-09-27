@@ -7,19 +7,18 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
-    Alert,
-    Dimensions,
-    Image,
-    Linking,
-    Platform,
-    ScrollView,
-    TouchableOpacity,
+  Alert,
+  Dimensions,
+  Image,
+  Linking,
+  Platform,
+  ScrollView,
+  TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import FireEffect from "@/src/components/FireEffect";
 import { usePropertyStore } from "@/src/hooks/usePropertyStore";
-import { Property } from "@/src/types/Property";
 import { formatCurrency } from "@/src/utils/formatters";
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -34,10 +33,25 @@ export default function PropertyDetailsModal() {
   const params = useLocalSearchParams();
   const { properties, favorites, toggleFavorite } = usePropertyStore();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [selectedAgentId, setSelectedAgentId] = useState<string>("");
 
   // Find the property by ID
   const propertyId = params.id as string;
   const property = [...properties, ...favorites].find(p => p.id === propertyId);
+
+  // Set default selected agent (prefer premium agents)
+  React.useEffect(() => {
+    if (property?.agents && property.agents.length > 0) {
+      // First try to find a premium agent
+      const premiumAgent = property.agents.find(agent => agent.isPremium);
+      if (premiumAgent) {
+        setSelectedAgentId(premiumAgent.id);
+      } else {
+        // Otherwise, select the first agent
+        setSelectedAgentId(property.agents[0].id);
+      }
+    }
+  }, [property]);
 
   if (!property) {
     return (
@@ -55,11 +69,15 @@ export default function PropertyDetailsModal() {
     );
   }
 
-  const handleWhatsApp = (property: Property) => {
+  const selectedAgent = property.agents.find(agent => agent.id === selectedAgentId) || property.agents[0];
+
+  const handleWhatsApp = (agent: typeof selectedAgent) => {
+    if (!agent) return;
+    
     const message = `Olá! Tenho interesse no imóvel: ${property.title} - ${
       property.location
     }. Valor: ${formatCurrency(property.price)}/mês`;
-    const phone = property.agent.phone.replace(/\D/g, "");
+    const phone = agent.phone.replace(/\D/g, "");
     const url = `whatsapp://send?phone=55${phone}&text=${encodeURIComponent(
       message
     )}`;
@@ -311,45 +329,201 @@ export default function PropertyDetailsModal() {
             </YStack>
           )}
 
-          {/* Agent Info */}
-          <Card backgroundColor="$backgroundStrong" padding="$4" borderRadius="$4">
-            <Text fontSize="$5" fontWeight="600" color="$color" marginBottom="$3">
+          {/* Agent Selection */}
+          <YStack gap="$3">
+            <Text fontSize="$5" fontWeight="600" color="$color">
               Disponível com:
             </Text>
 
-            <XStack justifyContent="space-between" alignItems="center">
-              <YStack flex={1}>
-                <XStack alignItems="center" gap="$2">
-                  {!property.agent.isOwner && property.agent.rating > 0 && (
-                    <XStack alignItems="center" gap="$1">
+            {/* Agent Selector */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <XStack gap="$3" paddingHorizontal="$1">
+                {property.agents.map((agent) => (
+                  <TouchableOpacity
+                    key={agent.id}
+                    onPress={() => setSelectedAgentId(agent.id)}
+                  >
+                    <Card
+                      backgroundColor={selectedAgentId === agent.id ? "$blue2" : "$backgroundStrong"}
+                      borderColor={selectedAgentId === agent.id ? "$blue8" : "$borderColor"}
+                      borderWidth={selectedAgentId === agent.id ? 2 : 1}
+                      padding="$3"
+                      borderRadius="$4"
+                      minWidth={200}
+                      position="relative"
+                    >
+                      {/* Premium Badge */}
+                      {agent.isPremium && (
+                        <YStack
+                          position="absolute"
+                          top={-8}
+                          right={-8}
+                          backgroundColor="$orange10"
+                          borderRadius="$6"
+                          paddingHorizontal="$2"
+                          paddingVertical="$1"
+                          zIndex={1}
+                        >
+                          <XStack alignItems="center" gap="$1">
+                            <Ionicons name="star" size={12} color="white" />
+                            <Text color="white" fontSize="$1" fontWeight="bold">
+                              PREMIUM
+                            </Text>
+                          </XStack>
+                        </YStack>
+                      )}
+
+                      <YStack gap="$2">
+                        <XStack justifyContent="space-between" alignItems="flex-start">
+                          <YStack flex={1}>
+                            <Text 
+                              fontSize="$4" 
+                              fontWeight="bold" 
+                              color={selectedAgentId === agent.id ? "$blue11" : "$color"}
+                            >
+                              {agent.name}
+                            </Text>
+                            <Text fontSize="$2" color="$gray10">
+                              {agent.company}
+                            </Text>
+                          </YStack>
+
+                          {!agent.isOwner && agent.rating > 0 && (
+                            <YStack
+                              backgroundColor={agent.isPremium ? "$orange10" : "$gray8"}
+                              borderRadius="$6"
+                              paddingHorizontal="$2"
+                              paddingVertical="$1"
+                            >
+                              <Text color="white" fontSize="$2" fontWeight="bold">
+                                {agent.rating.toFixed(1)}
+                              </Text>
+                            </YStack>
+                          )}
+                        </XStack>
+
+                        <Text fontSize="$2" color="$gray10">
+                          Responde {agent.responseTime}
+                        </Text>
+
+                        {agent.experience && (
+                          <Text fontSize="$2" color="$gray10">
+                            {agent.experience} de experiência
+                          </Text>
+                        )}
+
+                        {agent.specialties && agent.specialties.length > 0 && (
+                          <XStack flexWrap="wrap" gap="$1">
+                            {agent.specialties.slice(0, 2).map((specialty, index) => (
+                              <YStack
+                                key={index}
+                                backgroundColor={agent.isPremium ? "$orange2" : "$gray2"}
+                                paddingHorizontal="$2"
+                                paddingVertical="$1"
+                                borderRadius="$2"
+                              >
+                                <Text 
+                                  fontSize="$1" 
+                                  color={agent.isPremium ? "$orange11" : "$gray11"}
+                                >
+                                  {specialty}
+                                </Text>
+                              </YStack>
+                            ))}
+                          </XStack>
+                        )}
+                      </YStack>
+                    </Card>
+                  </TouchableOpacity>
+                ))}
+              </XStack>
+            </ScrollView>
+
+            {/* Selected Agent Details */}
+            {selectedAgent && (
+              <Card 
+                backgroundColor="$backgroundStrong" 
+                padding="$4" 
+                borderRadius="$4"
+                borderColor={selectedAgent.isPremium ? "$orange8" : "$borderColor"}
+                borderWidth={selectedAgent.isPremium ? 2 : 1}
+              >
+                <YStack gap="$3">
+                  <XStack justifyContent="space-between" alignItems="center">
+                    <Text fontSize="$5" fontWeight="600" color="$color">
+                      Corretor Selecionado
+                    </Text>
+                    {selectedAgent.isPremium && (
+                      <XStack alignItems="center" gap="$1">
+                        <Ionicons name="star" size={16} color="#FF8C00" />
+                        <Text color="$orange11" fontSize="$3" fontWeight="bold">
+                          PREMIUM
+                        </Text>
+                      </XStack>
+                    )}
+                  </XStack>
+
+                  <XStack justifyContent="space-between" alignItems="center">
+                    <YStack flex={1}>
+                      <Text fontSize="$5" fontWeight="600" color="$color">
+                        {selectedAgent.name}
+                      </Text>
+                      <Text fontSize="$3" color="$gray10">
+                        {selectedAgent.company}
+                      </Text>
+                      <Text fontSize="$3" color="$gray10">
+                        Responde {selectedAgent.responseTime}
+                      </Text>
+                      {selectedAgent.experience && (
+                        <Text fontSize="$3" color="$gray10">
+                          {selectedAgent.experience} de experiência
+                        </Text>
+                      )}
+                    </YStack>
+
+                    {!selectedAgent.isOwner && selectedAgent.rating > 0 && (
                       <YStack
-                        backgroundColor="$gray8"
+                        backgroundColor={selectedAgent.isPremium ? "$orange10" : "$gray8"}
                         borderRadius="$6"
-                        paddingHorizontal="$2"
-                        paddingVertical="$1"
+                        paddingHorizontal="$3"
+                        paddingVertical="$2"
                       >
-                        <Text color="white" fontSize="$3" fontWeight="bold">
-                          {property.agent.rating.toFixed(1)}
+                        <Text color="white" fontSize="$4" fontWeight="bold">
+                          {selectedAgent.rating.toFixed(1)}
                         </Text>
                       </YStack>
-                    </XStack>
-                  )}
+                    )}
+                  </XStack>
 
-                  <YStack flex={1}>
-                    <Text fontSize="$5" fontWeight="600" color="$color">
-                      {property.agent.name}
-                    </Text>
-                    <Text fontSize="$3" color="$gray10">
-                      {property.agent.company}
-                    </Text>
-                    <Text fontSize="$3" color="$gray10">
-                      {property.agent.responseTime}
-                    </Text>
-                  </YStack>
-                </XStack>
-              </YStack>
-            </XStack>
-          </Card>
+                  {selectedAgent.specialties && selectedAgent.specialties.length > 0 && (
+                    <YStack gap="$2">
+                      <Text fontSize="$4" fontWeight="600" color="$color">
+                        Especialidades
+                      </Text>
+                      <XStack flexWrap="wrap" gap="$2">
+                        {selectedAgent.specialties.map((specialty, index) => (
+                          <YStack
+                            key={index}
+                            backgroundColor={selectedAgent.isPremium ? "$orange2" : "$blue2"}
+                            paddingHorizontal="$3"
+                            paddingVertical="$2"
+                            borderRadius="$3"
+                          >
+                            <Text 
+                              fontSize="$3" 
+                              color={selectedAgent.isPremium ? "$orange11" : "$blue11"}
+                            >
+                              {specialty}
+                            </Text>
+                          </YStack>
+                        ))}
+                      </XStack>
+                    </YStack>
+                  )}
+                </YStack>
+              </Card>
+            )}
+          </YStack>
         </YStack>
       </ScrollView>
 
@@ -362,24 +536,41 @@ export default function PropertyDetailsModal() {
       >
         <Button
           size="$5"
-          backgroundColor={isHotProperty(property.likes) ? "$orange10" : "$green10"}
+          backgroundColor={
+            selectedAgent?.isPremium 
+              ? "$orange10" 
+              : isHotProperty(property.likes) 
+                ? "$orange10" 
+                : "$green10"
+          }
           color="white"
           borderRadius="$4"
           fontWeight="600"
-          onPress={() => handleWhatsApp(property)}
-          shadowColor={isHotProperty(property.likes) ? "#FF4500" : "transparent"}
+          onPress={() => handleWhatsApp(selectedAgent)}
+          shadowColor={
+            selectedAgent?.isPremium || isHotProperty(property.likes) 
+              ? "#FF4500" 
+              : "transparent"
+          }
           shadowOffset={{ width: 0, height: 0 }}
           shadowOpacity={0.5}
           shadowRadius={10}
           icon={
-            isHotProperty(property.likes) ? (
+            selectedAgent?.isPremium ? (
+              <Ionicons name="star" size={20} color="white" />
+            ) : isHotProperty(property.likes) ? (
               <Ionicons name="flame" size={20} color="white" />
             ) : (
               <Ionicons name="logo-whatsapp" size={20} color="white" />
             )
           }
         >
-          {isHotProperty(property.likes) ? "Imóvel em Alta!" : "Falar no WhatsApp"}
+          {selectedAgent?.isPremium 
+            ? `Falar com ${selectedAgent.name} (Premium)` 
+            : isHotProperty(property.likes) 
+              ? "Imóvel em Alta!" 
+              : "Falar no WhatsApp"
+          }
         </Button>
       </YStack>
     </SafeAreaView>

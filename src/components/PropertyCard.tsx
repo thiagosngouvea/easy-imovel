@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Button } from '@tamagui/button';
 import { Card } from '@tamagui/card';
 import { Text } from '@tamagui/core';
 import { XStack, YStack } from '@tamagui/stacks';
@@ -29,12 +28,12 @@ interface PropertyCardProps {
   onSwipeRight?: (property: Property) => void;
   onPress?: (property: Property) => void;
   isBackground?: boolean;
-  style?: any; // Adiciona prop style
+  style?: any;
 }
 
 // Add this function to determine if property is hot
 const isHotProperty = (likes: number): boolean => {
-  return likes >= 100; // Properties with 100+ likes are considered "hot"
+  return likes >= 100;
 };
 
 export default function PropertyCard({ 
@@ -145,25 +144,32 @@ export default function PropertyCard({
     );
   };
 
+  // Get the primary agent (prefer premium, fallback to first)
+  const primaryAgent = property.agents?.find(agent => agent.isPremium) || property.agents?.[0];
+
   return (
     <GestureDetector gesture={panGesture}>
       <Animated.View style={[{ width: CARD_WIDTH }, animatedStyle, style]}>
-        <Card
-          elevate
-          size="$6"
-          bordered
-          backgroundColor="$background"
-          borderRadius="$6"
-          overflow="hidden"
-          shadowColor="$shadowColor"
-          shadowOffset={{ width: 0, height: 4 }}
-          shadowOpacity={isBackground ? 0.05 : 0.1}
-          shadowRadius={8}
-          opacity={isBackground ? 0.8 : 1}
-          // Add fire glow effect for hot properties
-          borderColor={isHotProperty(property.likes) ? "rgba(255, 69, 0, 0.3)" : "$borderColor"}
-          borderWidth={isHotProperty(property.likes) ? 2 : 1}
+        <TouchableOpacity 
+          activeOpacity={0.95}
+          onPress={() => onPress?.(property)}
+          disabled={isBackground}
         >
+          <Card
+            elevate
+            size="$6"
+            bordered
+            backgroundColor="$background"
+            borderRadius="$6"
+            overflow="hidden"
+            shadowColor="$shadowColor"
+            shadowOffset={{ width: 0, height: 4 }}
+            shadowOpacity={isBackground ? 0.05 : 0.1}
+            shadowRadius={8}
+            opacity={isBackground ? 0.8 : 1}
+            borderColor={isHotProperty(property.likes) ? "rgba(255, 69, 0, 0.3)" : "$borderColor"}
+            borderWidth={isHotProperty(property.likes) ? 2 : 1}
+          >
             {/* Image Section */}
             <YStack position="relative">
               <Image
@@ -191,7 +197,10 @@ export default function PropertyCard({
               {property.images.length > 1 && (
                 <>
                   <TouchableOpacity
-                    onPress={prevImage}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      prevImage();
+                    }}
                     style={{
                       position: 'absolute',
                       left: 10,
@@ -205,7 +214,10 @@ export default function PropertyCard({
                   </TouchableOpacity>
                   
                   <TouchableOpacity
-                    onPress={nextImage}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      nextImage();
+                    }}
                     style={{
                       position: 'absolute',
                       right: 10,
@@ -249,7 +261,6 @@ export default function PropertyCard({
                 paddingHorizontal="$3"
                 paddingVertical="$2"
                 borderRadius="$3"
-                // Add subtle glow for hot properties
                 shadowColor={isHotProperty(property.likes) ? "#FF4500" : "transparent"}
                 shadowOffset={{ width: 0, height: 0 }}
                 shadowOpacity={0.6}
@@ -332,29 +343,34 @@ export default function PropertyCard({
                   </Text>
                   
                   <XStack justifyContent="space-between" alignItems="center">
-                    <YStack flex={1}>
+                    <YStack flex={1} mt={"4"}>
                       <XStack alignItems="center" gap="$2">
-                        {!property.agent.isOwner && property.agent.rating > 0 && (
+                        {primaryAgent && !primaryAgent.isOwner && primaryAgent.rating > 0 && (
                           <XStack alignItems="center" gap="$1">
                             <YStack
-                              backgroundColor="$gray8"
+                              backgroundColor={primaryAgent.isPremium ? "$orange10" : "$gray8"}
                               borderRadius="$6"
                               paddingHorizontal="$2"
                               paddingVertical="$1"
                             >
                               <Text color="white" fontSize="$2" fontWeight="bold">
-                                {property.agent.rating.toFixed(1)}
+                                {primaryAgent.rating.toFixed(1)}
                               </Text>
                             </YStack>
                           </XStack>
                         )}
                         
                         <YStack flex={1}>
-                          <Text fontSize="$4" fontWeight="600" color="$color">
-                            {property.agent.name}
-                          </Text>
+                          <XStack alignItems="center" gap="$1">
+                            <Text fontSize="$4" fontWeight="600" color="$color">
+                              {primaryAgent?.name || 'N/A'}
+                            </Text>
+                            {primaryAgent?.isPremium && (
+                              <Ionicons name="star" size={12} color="#FF8C00" />
+                            )}
+                          </XStack>
                           <Text fontSize="$3" color="$gray10">
-                            {property.agent.responseTime}
+                            {primaryAgent?.responseTime || 'N/A'}
                           </Text>
                         </YStack>
                       </XStack>
@@ -362,30 +378,9 @@ export default function PropertyCard({
                   </XStack>
                 </YStack>
               </Card>
-
-              {/* Action Button */}
-              <Button
-                size="$4"
-                backgroundColor={isHotProperty(property.likes) ? "$orange10" : "$green10"}
-                color="white"
-                borderRadius="$4"
-                fontWeight="600"
-                onPress={() => onPress?.(property)}
-                // Add glow effect for hot properties
-                shadowColor={isHotProperty(property.likes) ? "#FF4500" : "transparent"}
-                shadowOffset={{ width: 0, height: 0 }}
-                shadowOpacity={0.5}
-                shadowRadius={10}
-                icon={
-                  isHotProperty(property.likes) ? 
-                    <Ionicons name="flame" size={20} color="white" /> :
-                    <Ionicons name="logo-whatsapp" size={20} color="white" />
-                }
-              >
-                {isHotProperty(property.likes) ? 'Imóvel em Alta!' : 'Falar no WhatsApp'}
-              </Button>
             </YStack>
-        </Card>
+          </Card>
+        </TouchableOpacity>
       </Animated.View>
     </GestureDetector>
   );

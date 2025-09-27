@@ -16,13 +16,41 @@ export const mockProperties: Property[] = [
     ],
     description: 'Apartamento moderno no centro da cidade, próximo ao metrô e comércio local.',
     type: 'apartment',
-    agent: {
-      name: 'Imobiliária X',
-      company: 'Imobiliária X',
-      rating: 4.8,
-      responseTime: 'até 2h',
-      phone: '(11) 99999-9999'
-    },
+    agents: [
+      {
+        id: '1',
+        name: 'Imobiliária X',
+        company: 'Imobiliária X',
+        rating: 4.8,
+        responseTime: 'até 2h',
+        phone: '(11) 99999-9999',
+        isPremium: true,
+        specialties: ['Apartamentos', 'Centro'],
+        experience: '10 anos'
+      },
+      {
+        id: '2',
+        name: 'Ana Costa',
+        company: 'Costa Imóveis',
+        rating: 4.6,
+        responseTime: 'até 3h',
+        phone: '(11) 98888-8888',
+        isPremium: false,
+        specialties: ['Residencial'],
+        experience: '5 anos'
+      },
+      {
+        id: '3',
+        name: 'Roberto Silva',
+        company: 'Silva Corretores',
+        rating: 4.9,
+        responseTime: 'até 1h',
+        phone: '(11) 97777-7777',
+        isPremium: true,
+        specialties: ['Apartamentos', 'Investimentos'],
+        experience: '15 anos'
+      }
+    ],
     features: ['Elevador', 'Portaria 24h', 'Área de lazer', 'Garagem'],
     coordinates: {
       latitude: -23.5505,
@@ -30,7 +58,7 @@ export const mockProperties: Property[] = [
     },
     createdAt: new Date('2024-01-15'),
     isFavorite: false,
-    likes: 156 // HOT property!
+    likes: 156
   },
   {
     id: '2',
@@ -47,13 +75,30 @@ export const mockProperties: Property[] = [
     ],
     description: 'Casa aconchegante com quintal, ideal para famílias. Localizada em bairro residencial.',
     type: 'house',
-    agent: {
-      name: 'João Silva',
-      company: 'Corretor Independente',
-      rating: 4.5,
-      responseTime: 'até 1h',
-      phone: '(11) 88888-8888'
-    },
+    agents: [
+      {
+        id: '4',
+        name: 'João Silva',
+        company: 'Corretor Independente',
+        rating: 4.5,
+        responseTime: 'até 1h',
+        phone: '(11) 88888-8888',
+        isPremium: false,
+        specialties: ['Casas', 'Famílias'],
+        experience: '8 anos'
+      },
+      {
+        id: '5',
+        name: 'Premium Houses',
+        company: 'Premium Houses',
+        rating: 4.9,
+        responseTime: 'até 30min',
+        phone: '(11) 96666-6666',
+        isPremium: true,
+        specialties: ['Casas de luxo', 'Vila Madalena'],
+        experience: '12 anos'
+      }
+    ],
     features: ['Quintal', 'Churrasqueira', 'Garagem para 2 carros', 'Lavanderia'],
     coordinates: {
       latitude: -23.5440,
@@ -78,14 +123,18 @@ export const mockProperties: Property[] = [
     ],
     description: 'Studio compacto e moderno, perfeito para jovens profissionais.',
     type: 'studio',
-    agent: {
-      name: 'Maria Santos',
-      company: 'Proprietário direto',
-      rating: 0,
-      responseTime: 'sem avaliação',
-      phone: '(11) 77777-7777',
-      isOwner: true
-    },
+    agents: [
+      {
+        id: '6',
+        name: 'Maria Santos',
+        company: 'Proprietário direto',
+        rating: 0,
+        responseTime: 'sem avaliação',
+        phone: '(11) 77777-7777',
+        isOwner: true,
+        isPremium: false
+      }
+    ],
     features: ['Mobiliado', 'Internet incluída', 'Próximo ao metrô'],
     coordinates: {
       latitude: -23.5629,
@@ -93,7 +142,7 @@ export const mockProperties: Property[] = [
     },
     createdAt: new Date('2024-01-20'),
     isFavorite: false,
-    likes: 234 // HOT property!
+    likes: 234
   },
   {
     id: '4',
@@ -110,13 +159,30 @@ export const mockProperties: Property[] = [
     ],
     description: 'Apartamento de alto padrão com vista panorâmica da cidade.',
     type: 'apartment',
-    agent: {
-      name: 'Premium Imóveis',
-      company: 'Premium Imóveis',
-      rating: 4.9,
-      responseTime: 'até 30min',
-      phone: '(11) 66666-6666'
-    },
+    agents: [
+      {
+        id: '7',
+        name: 'Premium Imóveis',
+        company: 'Premium Imóveis',
+        rating: 4.9,
+        responseTime: 'até 30min',
+        phone: '(11) 66666-6666',
+        isPremium: true,
+        specialties: ['Luxo', 'Jardins', 'Alto padrão'],
+        experience: '20 anos'
+      },
+      {
+        id: '8',
+        name: 'Elite Corretores',
+        company: 'Elite Corretores',
+        rating: 4.8,
+        responseTime: 'até 1h',
+        phone: '(11) 95555-5555',
+        isPremium: true,
+        specialties: ['Apartamentos de luxo'],
+        experience: '18 anos'
+      }
+    ],
     features: ['Vista panorâmica', 'Piscina', 'Academia', 'Concierge', 'Varanda gourmet'],
     coordinates: {
       latitude: -23.5614,
@@ -124,7 +190,7 @@ export const mockProperties: Property[] = [
     },
     createdAt: new Date('2024-01-25'),
     isFavorite: false,
-    likes: 312 // HOT property!
+    likes: 312
   },
   {
     id: '5',
@@ -141,13 +207,19 @@ export const mockProperties: Property[] = [
     ],
     description: 'Loft com design industrial, pé direito alto e muito estilo.',
     type: 'apartment',
-    agent: {
-      name: 'Carlos Oliveira',
-      company: 'Oliveira Imóveis',
-      rating: 4.7,
-      responseTime: 'até 1h',
-      phone: '(11) 55555-5555'
-    },
+    agents: [
+      {
+        id: '9',
+        name: 'Carlos Oliveira',
+        company: 'Oliveira Imóveis',
+        rating: 4.7,
+        responseTime: 'até 1h',
+        phone: '(11) 55555-5555',
+        isPremium: false,
+        specialties: ['Lofts', 'Vila Olímpia'],
+        experience: '7 anos'
+      }
+    ],
     features: ['Pé direito alto', 'Design industrial', 'Vaga de garagem', 'Próximo ao metrô'],
     coordinates: {
       latitude: -23.5955,
