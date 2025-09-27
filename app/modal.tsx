@@ -336,12 +336,17 @@ export default function PropertyDetailsModal() {
             </Text>
 
             {/* Agent Selector */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingTop: 12, paddingBottom: 8 }} // Adiciona padding para o badge
+            >
               <XStack gap="$3" paddingHorizontal="$1">
                 {property.agents.map((agent) => (
                   <TouchableOpacity
                     key={agent.id}
                     onPress={() => setSelectedAgentId(agent.id)}
+                    style={{ overflow: 'visible' }} // Permite overflow no TouchableOpacity também
                   >
                     <Card
                       backgroundColor={selectedAgentId === agent.id ? "$blue2" : "$backgroundStrong"}
@@ -351,18 +356,26 @@ export default function PropertyDetailsModal() {
                       borderRadius="$4"
                       minWidth={200}
                       position="relative"
+                      overflow="visible" // Permite que o badge apareça fora do card
+                      marginTop="$3" // Adiciona espaço no topo para o badge
+                      marginRight="$2" // Adiciona espaço na direita para o badge
                     >
                       {/* Premium Badge */}
                       {agent.isPremium && (
                         <YStack
                           position="absolute"
-                          top={-8}
-                          right={-8}
+                          top={-12} // Aumenta a distância do topo
+                          right={-12} // Aumenta a distância da direita
                           backgroundColor="$orange10"
                           borderRadius="$6"
                           paddingHorizontal="$2"
                           paddingVertical="$1"
-                          zIndex={1}
+                          zIndex={999} // zIndex muito alto
+                          elevation={10} // Para Android
+                          shadowColor="$shadowColor" // Adiciona sombra para destacar
+                          shadowOffset={{ width: 0, height: 2 }}
+                          shadowOpacity={0.3}
+                          shadowRadius={4}
                         >
                           <XStack alignItems="center" gap="$1">
                             <Ionicons name="star" size={12} color="white" />
