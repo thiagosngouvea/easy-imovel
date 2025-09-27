@@ -3,8 +3,8 @@ import { Button } from '@tamagui/button';
 import { Text } from '@tamagui/core';
 import { XStack, YStack } from '@tamagui/stacks';
 import React, { useEffect, useState } from 'react';
-import { Alert, Dimensions, Linking, StatusBar } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Alert, Dimensions, Linking, StatusBar, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import PropertyCard from '../components/PropertyCard';
 import { usePropertyStore } from '../hooks/usePropertyStore';
@@ -27,12 +27,14 @@ export default function HomeScreen() {
   } = usePropertyStore();
 
   const [showActions, setShowActions] = useState(true);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     loadProperties();
   }, []);
 
   const currentProperty = getCurrentProperty();
+  const nextProperty = properties[currentIndex + 1] || null;
   const remainingCount = getRemainingCount();
 
   const handleLike = (property: Property) => {
@@ -70,7 +72,7 @@ export default function HomeScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#f8f9fa' }}>
+      <View style={{ flex: 1, backgroundColor: '#f8f9fa' }}>
         <StatusBar barStyle="dark-content" backgroundColor="#f8f9fa" />
         <YStack flex={1} alignItems="center" justifyContent="center" gap="$4">
           <Text fontSize="$6" color="$color">
@@ -80,13 +82,13 @@ export default function HomeScreen() {
             Encontrando as melhores opções para você
           </Text>
         </YStack>
-      </SafeAreaView>
+      </View>
     );
   }
 
   if (!currentProperty) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#f8f9fa' }}>
+      <View style={{ flex: 1, backgroundColor: '#f8f9fa' }}>
         <StatusBar barStyle="dark-content" backgroundColor="#f8f9fa" />
         <YStack flex={1} alignItems="center" justifyContent="center" gap="$4" padding="$6">
           <Ionicons name="home-outline" size={80} color="#ccc" />
@@ -130,12 +132,12 @@ export default function HomeScreen() {
             )}
           </YStack>
         </YStack>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f8f9fa' }}>
+    <View style={{ flex: 1, backgroundColor: '#f8f9fa' }}>
       <StatusBar barStyle="dark-content" backgroundColor="#f8f9fa" />
       
       {/* Header */}
@@ -144,15 +146,16 @@ export default function HomeScreen() {
         alignItems="center"
         paddingHorizontal="$4"
         paddingVertical="$3"
-        backgroundColor="$background"
+        paddingTop={insets.top + 12} // Adiciona o padding da status bar + espaçamento
+        backgroundColor="$orange9"
         borderBottomWidth={1}
         borderBottomColor="$borderColor"
       >
         <YStack>
-          <Text fontSize="$6" fontWeight="bold" color="$color">
+          <Text fontSize="$6" fontWeight="bold" color="$white">
             Easy Imóveis
           </Text>
-          <Text fontSize="$3" color="$gray10">
+          <Text fontSize="$3" color="$white">
             {remainingCount} imóveis restantes
           </Text>
         </YStack>
@@ -202,27 +205,57 @@ export default function HomeScreen() {
       <YStack
         flex={1}
         alignItems="center"
-        justifyContent="center"
+        justifyContent="center" // Volta para center
         paddingHorizontal="$4"
         paddingVertical="$4"
       >
-        <PropertyCard
-          property={currentProperty}
-          onSwipeLeft={handleReject}
-          onSwipeRight={handleLike}
-          onPress={handleWhatsApp}
-        />
+        {/* Next Property Card (Background) */}
+        {nextProperty && (
+          <PropertyCard
+            property={nextProperty}
+            onSwipeLeft={() => {}}
+            onSwipeRight={() => {}}
+            onPress={() => {}}
+            isBackground={true}
+            style={{
+              position: 'absolute',
+              zIndex: 1,
+              opacity: 0.8,
+              transform: [{ scale: 0.95 }]
+            }}
+          />
+        )}
+
+        {/* Current Property Card (Foreground) */}
+        {currentProperty && (
+          <PropertyCard
+            property={currentProperty}
+            onSwipeLeft={handleReject}
+            onSwipeRight={handleLike}
+            onPress={handleWhatsApp}
+            isBackground={false}
+            style={{
+              zIndex: 2
+            }}
+          />
+        )}
       </YStack>
 
       {/* Action Buttons */}
       {showActions && (
         <XStack
+          position="absolute"
+          bottom={-30} // Volta para a parte inferior
+          left={0}
+          right={0}
+          zIndex={10} // Adiciona zIndex alto para ficar na frente de tudo
           justifyContent="center"
           alignItems="center"
           gap="$6"
           paddingHorizontal="$4"
           paddingBottom="$6"
           paddingTop="$3"
+          backgroundColor="transparent"
         >
           <Button
             size="$5"
@@ -274,6 +307,6 @@ export default function HomeScreen() {
           ← Deslize para rejeitar • Deslize para curtir →
         </Text>
       </YStack> */}
-    </SafeAreaView>
+    </View>
   );
 }

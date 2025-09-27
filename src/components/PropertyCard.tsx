@@ -7,12 +7,12 @@ import React, { useState } from 'react';
 import { Dimensions, Image, TouchableOpacity } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
-    Extrapolate,
-    interpolate,
-    runOnJS,
-    useAnimatedStyle,
-    useSharedValue,
-    withSpring,
+  Extrapolate,
+  interpolate,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
 } from 'react-native-reanimated';
 
 import { Property } from '../types/Property';
@@ -27,48 +27,72 @@ interface PropertyCardProps {
   onSwipeLeft?: (property: Property) => void;
   onSwipeRight?: (property: Property) => void;
   onPress?: (property: Property) => void;
+  isBackground?: boolean;
+  style?: any; // Adiciona prop style
 }
 
 export default function PropertyCard({ 
   property, 
   onSwipeLeft, 
   onSwipeRight, 
-  onPress 
+  onPress,
+  isBackground = false,
+  style // Adiciona style
 }: PropertyCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
 
   const handleSwipeLeft = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
     onSwipeLeft?.(property);
   };
 
   const handleSwipeRight = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
     onSwipeRight?.(property);
   };
 
   const panGesture = Gesture.Pan()
+    .enabled(!isBackground && !isAnimating)
     .onStart(() => {
       scale.value = withSpring(0.95);
     })
     .onUpdate((event) => {
       translateX.value = event.translationX;
       translateY.value = event.translationY * 0.1;
+      
+      // Update opacity based on swipe distance
+      const progress = Math.abs(event.translationX) / SWIPE_THRESHOLD;
+      opacity.value = Math.max(0.3, 1 - progress * 0.7);
     })
     .onEnd((event) => {
       const shouldSwipeLeft = event.translationX < -SWIPE_THRESHOLD;
       const shouldSwipeRight = event.translationX > SWIPE_THRESHOLD;
 
       if (shouldSwipeLeft) {
-        translateX.value = withSpring(-screenWidth);
+        translateX.value = withSpring(-screenWidth * 1.5, {
+          damping: 15,
+          stiffness: 150,
+        });
+        opacity.value = withSpring(0);
         runOnJS(handleSwipeLeft)();
       } else if (shouldSwipeRight) {
-        translateX.value = withSpring(screenWidth);
+        translateX.value = withSpring(screenWidth * 1.5, {
+          damping: 15,
+          stiffness: 150,
+        });
+        opacity.value = withSpring(0);
         runOnJS(handleSwipeRight)();
       } else {
         translateX.value = withSpring(0);
         translateY.value = withSpring(0);
+        opacity.value = withSpring(1);
       }
       
       scale.value = withSpring(1);
@@ -89,8 +113,19 @@ export default function PropertyCard({
         { scale: scale.value },
         { rotate: `${rotate}deg` },
       ],
+      opacity: opacity.value,
     };
   });
+
+  // Reset animation values when property changes
+  React.useEffect(() => {
+    translateX.value = 0;
+    translateY.value = 0;
+    scale.value = 1;
+    opacity.value = 1;
+    setIsAnimating(false);
+    setCurrentImageIndex(0);
+  }, [property.id]);
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => 
@@ -106,7 +141,7 @@ export default function PropertyCard({
 
   return (
     <GestureDetector gesture={panGesture}>
-      <Animated.View style={[{ width: CARD_WIDTH }, animatedStyle]}>
+      <Animated.View style={[{ width: CARD_WIDTH }, animatedStyle, style]}>
         <Card
           elevate
           size="$6"
@@ -116,8 +151,9 @@ export default function PropertyCard({
           overflow="hidden"
           shadowColor="$shadowColor"
           shadowOffset={{ width: 0, height: 4 }}
-          shadowOpacity={0.1}
+          shadowOpacity={isBackground ? 0.05 : 0.1}
           shadowRadius={8}
+          opacity={isBackground ? 0.8 : 1}
         >
           {/* Image Section */}
           <YStack position="relative">
