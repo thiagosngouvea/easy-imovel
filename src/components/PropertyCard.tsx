@@ -17,6 +17,7 @@ import Animated, {
 
 import { Property } from '../types/Property';
 import { formatCurrency } from '../utils/formatters';
+import FireEffect from './FireEffect';
 
 const { width: screenWidth } = Dimensions.get('window');
 const CARD_WIDTH = screenWidth * 0.9;
@@ -31,13 +32,18 @@ interface PropertyCardProps {
   style?: any; // Adiciona prop style
 }
 
+// Add this function to determine if property is hot
+const isHotProperty = (likes: number): boolean => {
+  return likes >= 100; // Properties with 100+ likes are considered "hot"
+};
+
 export default function PropertyCard({ 
   property, 
   onSwipeLeft, 
   onSwipeRight, 
   onPress,
   isBackground = false,
-  style // Adiciona style
+  style
 }: PropertyCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -154,6 +160,9 @@ export default function PropertyCard({
           shadowOpacity={isBackground ? 0.05 : 0.1}
           shadowRadius={8}
           opacity={isBackground ? 0.8 : 1}
+          // Add fire glow effect for hot properties
+          borderColor={isHotProperty(property.likes) ? "rgba(255, 69, 0, 0.3)" : "$borderColor"}
+          borderWidth={isHotProperty(property.likes) ? 2 : 1}
         >
           {/* Image Section */}
           <YStack position="relative">
@@ -167,6 +176,17 @@ export default function PropertyCard({
               resizeMode="cover"
             />
             
+            {/* Hot Property Badge */}
+            {isHotProperty(property.likes) && (
+              <YStack
+                position="absolute"
+                top={15}
+                left={15}
+              >
+                <FireEffect likes={property.likes} size="medium" />
+              </YStack>
+            )}
+
             {/* Image Navigation */}
             {property.images.length > 1 && (
               <>
@@ -240,14 +260,34 @@ export default function PropertyCard({
           <YStack padding="$4" gap="$3">
             {/* Title and Location */}
             <YStack gap="$2">
-              <Text fontSize="$6" fontWeight="bold" color="$color">
-                {property.title}
-              </Text>
-              <XStack alignItems="center" gap="$2">
-                <Ionicons name="location-outline" size={16} color="#666" />
-                <Text color="$gray10" fontSize="$4">
-                  {property.location}
-                </Text>
+              <XStack justifyContent="space-between" alignItems="flex-start">
+                <YStack flex={1}>
+                  <Text fontSize="$6" fontWeight="bold" color="$color">
+                    {property.title}
+                  </Text>
+                  <XStack alignItems="center" gap="$2">
+                    <Ionicons name="location-outline" size={16} color="#666" />
+                    <Text color="$gray10" fontSize="$4">
+                      {property.location}
+                    </Text>
+                  </XStack>
+                </YStack>
+                
+                {/* Likes counter */}
+                <XStack alignItems="center" gap="$1">
+                  <Ionicons 
+                    name={property.likes >= 100 ? "heart" : "heart-outline"} 
+                    size={16} 
+                    color={property.likes >= 100 ? "#FF4500" : "#666"} 
+                  />
+                  <Text 
+                    color={property.likes >= 100 ? "#FF4500" : "$gray10"} 
+                    fontSize="$3"
+                    fontWeight={property.likes >= 100 ? "bold" : "normal"}
+                  >
+                    {property.likes}
+                  </Text>
+                </XStack>
               </XStack>
             </YStack>
 
@@ -321,14 +361,18 @@ export default function PropertyCard({
             {/* Action Button */}
             <Button
               size="$4"
-              backgroundColor="$green10"
+              backgroundColor={isHotProperty(property.likes) ? "$orange10" : "$green10"}
               color="white"
               borderRadius="$4"
               fontWeight="600"
               onPress={() => onPress?.(property)}
-              icon={<Ionicons name="logo-whatsapp" size={20} color="white" />}
+              icon={
+                isHotProperty(property.likes) ? 
+                  <Ionicons name="flame" size={20} color="white" /> :
+                  <Ionicons name="logo-whatsapp" size={20} color="white" />
+              }
             >
-              Falar no WhatsApp
+              {isHotProperty(property.likes) ? 'Imóvel em Alta!' : 'Falar no WhatsApp'}
             </Button>
           </YStack>
         </Card>

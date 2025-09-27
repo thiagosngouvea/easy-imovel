@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { Alert, Dimensions, Linking, StatusBar, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import Header from '../components/Header';
 import PropertyCard from '../components/PropertyCard';
 import { usePropertyStore } from '../hooks/usePropertyStore';
 import { Property } from '../types/Property';
@@ -141,65 +142,14 @@ export default function HomeScreen() {
       <StatusBar barStyle="dark-content" backgroundColor="#f8f9fa" />
       
       {/* Header */}
-      <XStack
-        justifyContent="space-between"
-        alignItems="center"
-        paddingHorizontal="$4"
-        paddingVertical="$3"
-        paddingTop={insets.top + 12} // Adiciona o padding da status bar + espaçamento
-        backgroundColor="$orange9"
-        borderBottomWidth={1}
-        borderBottomColor="$borderColor"
-      >
-        <YStack>
-          <Text fontSize="$6" fontWeight="bold" color="$white">
-            Easy Imóveis
-          </Text>
-          <Text fontSize="$3" color="$white">
-            {remainingCount} imóveis restantes
-          </Text>
-        </YStack>
-
-        <XStack gap="$3">
-          <Button
-            size="$3"
-            variant="outlined"
-            borderColor="$borderColor"
-            color="$color"
-            circular
-            onPress={() => setShowActions(!showActions)}
-          >
-            <Ionicons name="settings-outline" size={18} />
-          </Button>
-          
-          {favorites.length > 0 && (
-            <Button
-              size="$3"
-              backgroundColor="$red10"
-              color="white"
-              circular
-              position="relative"
-            >
-              <Ionicons name="heart" size={18} />
-              <YStack
-                position="absolute"
-                top={-5}
-                right={-5}
-                backgroundColor="$orange10"
-                borderRadius="$6"
-                minWidth={20}
-                height={20}
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Text color="white" fontSize="$1" fontWeight="bold">
-                  {favorites.length}
-                </Text>
-              </YStack>
-            </Button>
-          )}
-        </XStack>
-      </XStack>
+      <Header
+        title="Easy Imóveis"
+        subtitle={`${remainingCount} imóveis restantes`}
+        showFavoriteButton={true}
+        showSettingsButton={true}
+        onSettingsPress={() => setShowActions(!showActions)}
+        onFavoritePress={() => {/* Navigate to favorites */}}
+      />
 
       {/* Card Stack */}
       <YStack

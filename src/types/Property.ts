@@ -24,6 +24,7 @@ export interface Property {
   };
   createdAt: Date;
   isFavorite?: boolean;
+  likes: number; // Número de curtidas
 }
 
 export interface PropertyFilters {

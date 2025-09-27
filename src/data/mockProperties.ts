@@ -29,7 +29,8 @@ export const mockProperties: Property[] = [
       longitude: -46.6333
     },
     createdAt: new Date('2024-01-15'),
-    isFavorite: false
+    isFavorite: false,
+    likes: 156 // HOT property!
   },
   {
     id: '2',
@@ -59,7 +60,8 @@ export const mockProperties: Property[] = [
       longitude: -46.6890
     },
     createdAt: new Date('2024-01-10'),
-    isFavorite: false
+    isFavorite: false,
+    likes: 89
   },
   {
     id: '3',
@@ -90,7 +92,8 @@ export const mockProperties: Property[] = [
       longitude: -46.7009
     },
     createdAt: new Date('2024-01-20'),
-    isFavorite: false
+    isFavorite: false,
+    likes: 234 // HOT property!
   },
   {
     id: '4',
@@ -120,7 +123,8 @@ export const mockProperties: Property[] = [
       longitude: -46.6562
     },
     createdAt: new Date('2024-01-25'),
-    isFavorite: false
+    isFavorite: false,
+    likes: 312 // HOT property!
   },
   {
     id: '5',
@@ -150,6 +154,7 @@ export const mockProperties: Property[] = [
       longitude: -46.6890
     },
     createdAt: new Date('2024-01-12'),
-    isFavorite: false
+    isFavorite: false,
+    likes: 67
   }
 ];

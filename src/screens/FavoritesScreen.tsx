@@ -1,28 +1,43 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Button } from '@tamagui/button';
-import { Text } from '@tamagui/core';
-import { XStack, YStack } from '@tamagui/stacks';
-import React from 'react';
-import { Alert, FlatList, Image, Linking, StatusBar, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from "@expo/vector-icons";
+import { Button } from "@tamagui/button";
+import { Text } from "@tamagui/core";
+import { XStack, YStack } from "@tamagui/stacks";
+import React from "react";
+import {
+  Alert,
+  FlatList,
+  Image,
+  Linking,
+  StatusBar,
+  TouchableOpacity,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { usePropertyStore } from '../hooks/usePropertyStore';
-import { Property } from '../types/Property';
-import { formatCurrency } from '../utils/formatters';
+import Header from "../components/Header";
+import { usePropertyStore } from "../hooks/usePropertyStore";
+import { Property } from "../types/Property";
+import { formatCurrency } from "../utils/formatters";
 
 export default function FavoritesScreen() {
   const { favorites } = usePropertyStore();
 
   const handleWhatsApp = (property: Property) => {
-    const message = `Olá! Tenho interesse no imóvel: ${property.title} - ${property.location}. Valor: ${formatCurrency(property.price)}/mês`;
-    const phone = property.agent.phone.replace(/\D/g, '');
-    const url = `whatsapp://send?phone=55${phone}&text=${encodeURIComponent(message)}`;
-    
+    const message = `Olá! Tenho interesse no imóvel: ${property.title} - ${
+      property.location
+    }. Valor: ${formatCurrency(property.price)}/mês`;
+    const phone = property.agent.phone.replace(/\D/g, "");
+    const url = `whatsapp://send?phone=55${phone}&text=${encodeURIComponent(
+      message
+    )}`;
+
     Linking.canOpenURL(url).then((supported) => {
       if (supported) {
         Linking.openURL(url);
       } else {
-        Alert.alert('WhatsApp não encontrado', 'Por favor, instale o WhatsApp para continuar.');
+        Alert.alert(
+          "WhatsApp não encontrado",
+          "Por favor, instale o WhatsApp para continuar."
+        );
       }
     });
   };
@@ -48,7 +63,7 @@ export default function FavoritesScreen() {
             width: 100,
             height: 100,
             borderRadius: 8,
-            backgroundColor: '#f0f0f0',
+            backgroundColor: "#f0f0f0",
           }}
           resizeMode="cover"
         />
@@ -58,7 +73,7 @@ export default function FavoritesScreen() {
           <Text fontSize="$5" fontWeight="bold" color="$color">
             {item.title}
           </Text>
-          
+
           <XStack alignItems="center" gap="$1">
             <Ionicons name="location-outline" size={14} color="#666" />
             <Text fontSize="$3" color="$gray10">
@@ -97,11 +112,11 @@ export default function FavoritesScreen() {
           <TouchableOpacity
             onPress={() => handleWhatsApp(item)}
             style={{
-              backgroundColor: '#25D366',
+              backgroundColor: "#25D366",
               padding: 12,
               borderRadius: 8,
-              alignItems: 'center',
-              justifyContent: 'center',
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
             <Ionicons name="logo-whatsapp" size={20} color="white" />
@@ -113,34 +128,38 @@ export default function FavoritesScreen() {
 
   if (favorites.length === 0) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#f8f9fa' }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#f8f9fa" }}>
         <StatusBar barStyle="dark-content" backgroundColor="#f8f9fa" />
-        
+
         {/* Header */}
-        <XStack
-          justifyContent="center"
-          alignItems="center"
-          paddingHorizontal="$4"
-          paddingVertical="$3"
+        <Header
+          title="Favoritos"
           backgroundColor="$background"
-          borderBottomWidth={1}
-          borderBottomColor="$borderColor"
-        >
-          <Text fontSize="$6" fontWeight="bold" color="$color">
-            Favoritos
-          </Text>
-        </XStack>
+          textColor="$color"
+        />
 
         {/* Empty State */}
-        <YStack flex={1} alignItems="center" justifyContent="center" gap="$4" padding="$6">
+        <YStack
+          flex={1}
+          alignItems="center"
+          justifyContent="center"
+          gap="$4"
+          padding="$6"
+        >
           <Ionicons name="heart-outline" size={80} color="#ccc" />
-          
-          <Text fontSize="$6" fontWeight="bold" color="$color" textAlign="center">
+
+          <Text
+            fontSize="$6"
+            fontWeight="bold"
+            color="$color"
+            textAlign="center"
+          >
             Nenhum favorito ainda
           </Text>
-          
+
           <Text fontSize="$4" color="$gray10" textAlign="center">
-            Quando você curtir um imóvel, ele aparecerá aqui para você acessar facilmente.
+            Quando você curtir um imóvel, ele aparecerá aqui para você acessar
+            facilmente.
           </Text>
 
           <Button
@@ -158,35 +177,23 @@ export default function FavoritesScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f8f9fa' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#f8f9fa" }}>
       <StatusBar barStyle="dark-content" backgroundColor="#f8f9fa" />
-      
-      {/* Header */}
-      <XStack
-        justifyContent="space-between"
-        alignItems="center"
-        paddingHorizontal="$4"
-        paddingVertical="$3"
-        backgroundColor="$background"
-        borderBottomWidth={1}
-        borderBottomColor="$borderColor"
-      >
-        <Text fontSize="$6" fontWeight="bold" color="$color">
-          Favoritos
-        </Text>
-        
-        <YStack
-          backgroundColor="$red10"
-          borderRadius="$6"
-          paddingHorizontal="$3"
-          paddingVertical="$1"
-        >
-          <Text color="white" fontSize="$3" fontWeight="bold">
-            {favorites.length}
-          </Text>
-        </YStack>
-      </XStack>
 
+      {/* Header */}
+
+      <Header
+        title="Favoritos"
+        subtitle={`${favorites.length} ${
+          favorites.length === 1 ? "favorito" : "favoritos"
+        }`}
+        showFavoriteButton={true}
+        showSettingsButton={true}
+        onSettingsPress={() => {}}
+        onFavoritePress={() => {
+          /* Navigate to favorites */
+        }}
+      />
       {/* Favorites List */}
       <FlatList
         data={favorites}
