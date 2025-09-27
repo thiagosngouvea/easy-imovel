@@ -11,8 +11,8 @@ import { useColorScheme } from '@/src/components/useColorScheme';
 import config from '@/src/theme/tamagui.config';
 
 export {
-    // Catch any errors thrown by the Layout component.
-    ErrorBoundary
+  // Catch any errors thrown by the Layout component.
+  ErrorBoundary
 } from 'expo-router';
 
 export const unstable_settings = {

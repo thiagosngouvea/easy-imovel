@@ -150,7 +150,7 @@ export default function HomeScreen() {
       >
         <YStack>
           <Text fontSize="$6" fontWeight="bold" color="$color">
-            Easy Imóvel
+            Easy Imóveis
           </Text>
           <Text fontSize="$3" color="$gray10">
             {remainingCount} imóveis restantes
@@ -260,7 +260,7 @@ export default function HomeScreen() {
       )}
 
       {/* Swipe Instructions */}
-      <YStack
+      {/* <YStack
         position="absolute"
         bottom={showActions ? 120 : 40}
         alignSelf="center"
@@ -273,7 +273,7 @@ export default function HomeScreen() {
         <Text color="white" fontSize="$2" textAlign="center">
           ← Deslize para rejeitar • Deslize para curtir →
         </Text>
-      </YStack>
+      </YStack> */}
     </SafeAreaView>
   );
 }
