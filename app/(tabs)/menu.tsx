@@ -9,6 +9,7 @@ import { Alert, ScrollView, StatusBar, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import Header from '../../src/components/Header';
+import SubscriptionBadge from '../../src/components/SubscriptionBadge';
 import { useAuthStore } from '../../src/hooks/useAuthStore';
 
 export default function MenuScreen() {
@@ -107,6 +108,13 @@ export default function MenuScreen() {
                   )}
                 </YStack>
               </XStack>
+              
+              {/* Subscription Badge for agents and agencies */}
+              {canManageProperties && (
+                <YStack marginTop="$3">
+                  <SubscriptionBadge showDetails={true} />
+                </YStack>
+              )}
             </Card>
           ) : (
             <Card padding="$4" backgroundColor="$background" borderRadius="$4">
@@ -186,6 +194,57 @@ export default function MenuScreen() {
                       </Text>
                       <Text fontSize="$3" color="$gray10">
                         Gerencie seus imóveis cadastrados
+                      </Text>
+                    </YStack>
+                    <Ionicons name="chevron-forward" size={20} color="#666" />
+                  </XStack>
+                </Card>
+              </TouchableOpacity>
+            )}
+
+            {/* Subscription Management - Only for agents and agencies */}
+            {canManageProperties && (
+              <TouchableOpacity onPress={() => router.push('/subscription')}>
+                <Card padding="$4" backgroundColor="$background" borderRadius="$4">
+                  <XStack alignItems="center" gap="$4">
+                    <YStack
+                      backgroundColor="$orange2"
+                      borderRadius="$6"
+                      padding="$3"
+                    >
+                      <Ionicons name="card-outline" size={24} color="#FB923C" />
+                    </YStack>
+                    <YStack flex={1}>
+                      <Text fontSize="$5" fontWeight="600" color="$color">
+                        Minha Assinatura
+                      </Text>
+                      <Text fontSize="$3" color="$gray10">
+                        Gerencie seu plano e pagamentos
+                      </Text>
+                    </YStack>
+                    <Ionicons name="chevron-forward" size={20} color="#666" />
+                  </XStack>
+                </Card>
+              </TouchableOpacity>
+            )}
+
+            {canManageProperties && (
+              <TouchableOpacity onPress={() => router.push('/plans')}>
+                <Card padding="$4" backgroundColor="$background" borderRadius="$4">
+                  <XStack alignItems="center" gap="$4">
+                    <YStack
+                      backgroundColor="$green2"
+                      borderRadius="$6"
+                      padding="$3"
+                    >
+                      <Ionicons name="diamond-outline" size={24} color="#22c55e" />
+                    </YStack>
+                    <YStack flex={1}>
+                      <Text fontSize="$5" fontWeight="600" color="$color">
+                        Planos Premium
+                      </Text>
+                      <Text fontSize="$3" color="$gray10">
+                        Escolha o melhor plano para você
                       </Text>
                     </YStack>
                     <Ionicons name="chevron-forward" size={20} color="#666" />

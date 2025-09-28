@@ -65,7 +65,27 @@ export default function RegisterScreen() {
     const success = await register(name, email, password, city, state, userType, company, creci, phone);
     
     if (success) {
-      router.replace('/(tabs)');
+      // Para corretores e imobiliárias, direcionar para escolha de plano
+      if (userType === 'agent' || userType === 'agency') {
+        Alert.alert(
+          'Conta Criada!', 
+          'Agora escolha o plano ideal para o seu negócio e comece a anunciar seus imóveis.',
+          [
+            { 
+              text: 'Escolher Plano', 
+              onPress: () => router.replace('/plans')
+            },
+            { 
+              text: 'Depois', 
+              style: 'cancel',
+              onPress: () => router.replace('/(tabs)')
+            }
+          ]
+        );
+      } else {
+        // Para clientes, ir direto para o app
+        router.replace('/(tabs)');
+      }
     } else {
       Alert.alert('Erro', 'Não foi possível criar a conta. Tente novamente.');
     }

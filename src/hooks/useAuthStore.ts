@@ -12,6 +12,8 @@ export interface User {
   company?: string; // Para agentes e imobiliárias
   creci?: string; // Para agentes
   phone?: string;
+  subscriptionStatus?: 'active' | 'inactive' | 'trial'; // Status da assinatura
+  planType?: 'basic' | 'premium' | 'enterprise'; // Tipo do plano
 }
 
 interface AuthState {
@@ -22,6 +24,7 @@ interface AuthState {
   register: (name: string, email: string, password: string, city: string, state: string, userType: UserType, company?: string, creci?: string, phone?: string) => Promise<boolean>;
   logout: () => void;
   setLoading: (loading: boolean) => void;
+  updateSubscriptionStatus: (status: 'active' | 'inactive' | 'trial', planType?: 'basic' | 'premium' | 'enterprise') => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -75,7 +78,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         userType,
         company,
         creci,
-        phone
+        phone,
+        // Para clientes, não há assinatura
+        subscriptionStatus: userType === 'client' ? undefined : 'inactive',
+        planType: undefined
       };
       
       set({ 
@@ -100,4 +106,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   
   setLoading: (isLoading: boolean) => 
     set({ isLoading }),
+
+  updateSubscriptionStatus: (status: 'active' | 'inactive' | 'trial', planType?: 'basic' | 'premium' | 'enterprise') => {
+    const { user } = get();
+    if (user) {
+      set({
+        user: {
+          ...user,
+          subscriptionStatus: status,
+          planType
+        }
+      });
+    }
+  },
 }));

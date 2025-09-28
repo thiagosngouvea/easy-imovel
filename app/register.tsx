@@ -1,3 +1,3 @@
-import RegisterScreen from '@/src/screens/RegisterScreen';
+import MultiStepRegisterScreen from '@/src/screens/MultiStepRegisterScreen';
 
-export default RegisterScreen;
+export default MultiStepRegisterScreen;
