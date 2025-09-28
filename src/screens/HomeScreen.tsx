@@ -7,10 +7,13 @@ import React, { useEffect, useState } from 'react';
 import { Alert, Dimensions, Linking, StatusBar, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import ChatListModal from '../components/ChatListModal';
 import FilterDrawer from '../components/FilterDrawer';
 import Header from '../components/Header';
 import PropertyCard from '../components/PropertyCard';
+import { useChatStore } from '../hooks/useChatStore';
 import { usePropertyStore } from '../hooks/usePropertyStore';
+import { ChatConversation } from '../types/Chat';
 import { Property, PropertyFilters } from '../types/Property';
 
 const { height: screenHeight } = Dimensions.get('window');
@@ -31,9 +34,11 @@ export default function HomeScreen() {
 
   const [showActions, setShowActions] = useState(true);
   const [showFilterDrawer, setShowFilterDrawer] = useState(false);
+  const [showChatListModal, setShowChatListModal] = useState(false);
   const [filters, setFilters] = useState<PropertyFilters>({});
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { setActiveConversation } = useChatStore();
 
   useEffect(() => {
     loadProperties();
@@ -94,6 +99,12 @@ export default function HomeScreen() {
     setFilters(newFilters);
     // Aqui você pode implementar a lógica de filtrar as propriedades
     console.log('Filtros aplicados:', newFilters);
+  };
+
+  const handleConversationSelect = (conversation: ChatConversation) => {
+    setActiveConversation(conversation);
+    // Navigate to chat modal or screen
+    router.push(`/modal?id=${conversation.propertyId}`);
   };
 
   if (isLoading) {
@@ -173,9 +184,11 @@ export default function HomeScreen() {
         showFavoriteButton={true}
         showSettingsButton={true}
         showFilterButton={true}
+        showChatButton={true}
         onSettingsPress={() => setShowActions(!showActions)}
         onFavoritePress={() => {/* Navigate to favorites */}}
         onFilterPress={() => setShowFilterDrawer(true)}
+        onChatPress={() => setShowChatListModal(true)}
       />
 
       {/* Card Stack */}
@@ -291,6 +304,13 @@ export default function HomeScreen() {
         onClose={() => setShowFilterDrawer(false)}
         filters={filters}
         onApplyFilters={handleApplyFilters}
+      />
+
+      {/* Chat List Modal */}
+      <ChatListModal
+        visible={showChatListModal}
+        onClose={() => setShowChatListModal(false)}
+        onConversationSelect={handleConversationSelect}
       />
     </View>
   );

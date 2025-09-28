@@ -5,6 +5,7 @@ import { XStack, YStack } from '@tamagui/stacks';
 import React from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useChatStore } from '../hooks/useChatStore';
 import { usePropertyStore } from '../hooks/usePropertyStore';
 
 interface HeaderProps {
@@ -13,9 +14,11 @@ interface HeaderProps {
   showFavoriteButton?: boolean;
   showSettingsButton?: boolean;
   showFilterButton?: boolean;
+  showChatButton?: boolean;
   onSettingsPress?: () => void;
   onFavoritePress?: () => void;
   onFilterPress?: () => void;
+  onChatPress?: () => void;
   backgroundColor?: string;
   textColor?: string;
 }
@@ -26,14 +29,20 @@ export default function Header({
   showFavoriteButton = false,
   showSettingsButton = false,
   showFilterButton = false,
+  showChatButton = false,
   onSettingsPress,
   onFavoritePress,
   onFilterPress,
+  onChatPress,
   backgroundColor = '$orange9',
   textColor = 'white'
 }: HeaderProps) {
   const insets = useSafeAreaInsets();
   const { favorites } = usePropertyStore();
+  const { conversations } = useChatStore();
+
+  // Get unread messages count
+  const unreadMessagesCount = conversations.reduce((total, conv) => total + conv.unreadCount, 0);
 
   return (
     <XStack
@@ -74,8 +83,40 @@ export default function Header({
         )}
       </YStack>
 
-      {/* Right side - Settings and Favorites */}
+      {/* Right side - Chat, Settings and Favorites */}
       <XStack gap="$3">
+        {showChatButton && (
+          <Button
+            size="$3"
+            variant="outlined"
+            borderColor="rgba(255,255,255,0.3)"
+            color={textColor}
+            circular
+            position="relative"
+            onPress={onChatPress}
+          >
+            <Ionicons name="chatbubbles-outline" size={18} />
+            {unreadMessagesCount > 0 && (
+              <YStack
+                position="absolute"
+                top={-5}
+                right={-5}
+                backgroundColor="$red10"
+                borderRadius="$6"
+                minWidth={18}
+                height={18}
+                alignItems="center"
+                justifyContent="center"
+                paddingHorizontal="$1"
+              >
+                <Text color="white" fontSize="$1" fontWeight="bold">
+                  {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
+                </Text>
+              </YStack>
+            )}
+          </Button>
+        )}
+
         {showSettingsButton && (
           <Button
             size="$3"

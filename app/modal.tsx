@@ -7,18 +7,23 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
-  Alert,
-  Dimensions,
-  Image,
-  Linking,
-  Platform,
-  ScrollView,
-  TouchableOpacity,
+    Alert,
+    Dimensions,
+    Image,
+    Linking,
+    Platform,
+    ScrollView,
+    TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import ChatListModal from "@/src/components/ChatListModal";
+import ChatModal from "@/src/components/ChatModal";
 import FireEffect from "@/src/components/FireEffect";
+import { useAuthStore } from "@/src/hooks/useAuthStore";
+import { useChatStore } from "@/src/hooks/useChatStore";
 import { usePropertyStore } from "@/src/hooks/usePropertyStore";
+import { ChatConversation } from "@/src/types/Chat";
 import { formatCurrency } from "@/src/utils/formatters";
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -32,8 +37,12 @@ export default function PropertyDetailsModal() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { properties, favorites, toggleFavorite } = usePropertyStore();
+  const { user } = useAuthStore();
+  const { conversations, setActiveConversation } = useChatStore();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedAgentId, setSelectedAgentId] = useState<string>("");
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [showChatListModal, setShowChatListModal] = useState(false);
 
   // Find the property by ID
   const propertyId = params.id as string;
@@ -94,6 +103,23 @@ export default function PropertyDetailsModal() {
     });
   };
 
+  const handleStartChat = (agent: typeof selectedAgent) => {
+    if (!agent || !user) {
+      Alert.alert("Erro", "Você precisa estar logado para iniciar uma conversa.");
+      return;
+    }
+    
+    setShowChatModal(true);
+  };
+
+  const handleConversationSelect = (conversation: ChatConversation) => {
+    setActiveConversation(conversation);
+    setShowChatModal(true);
+  };
+
+  // Get unread messages count
+  const unreadMessagesCount = conversations.reduce((total, conv) => total + conv.unreadCount, 0);
+
   const nextImage = () => {
     setCurrentImageIndex((prev) =>
       prev === property.images.length - 1 ? 0 : prev + 1
@@ -129,13 +155,40 @@ export default function PropertyDetailsModal() {
           Detalhes do Imóvel
         </Text>
         
-        <TouchableOpacity onPress={() => toggleFavorite(property)}>
-          <Ionicons 
-            name={isFavorited ? "heart" : "heart-outline"} 
-            size={24} 
-            color={isFavorited ? "#e74c3c" : "#333"} 
-          />
-        </TouchableOpacity>
+        <XStack alignItems="center" gap="$3">
+          {/* Chat List Button */}
+          <TouchableOpacity onPress={() => setShowChatListModal(true)}>
+            <YStack position="relative">
+              <Ionicons name="chatbubbles-outline" size={24} color="#333" />
+              {unreadMessagesCount > 0 && (
+                <YStack
+                  position="absolute"
+                  top={-8}
+                  right={-8}
+                  backgroundColor="$red10"
+                  borderRadius="$6"
+                  minWidth={18}
+                  height={18}
+                  alignItems="center"
+                  justifyContent="center"
+                  paddingHorizontal="$1"
+                >
+                  <Text color="white" fontSize="$1" fontWeight="bold">
+                    {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
+                  </Text>
+                </YStack>
+              )}
+            </YStack>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => toggleFavorite(property)}>
+            <Ionicons 
+              name={isFavorited ? "heart" : "heart-outline"} 
+              size={24} 
+              color={isFavorited ? "#e74c3c" : "#333"} 
+            />
+          </TouchableOpacity>
+        </XStack>
       </XStack>
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -540,13 +593,15 @@ export default function PropertyDetailsModal() {
         </YStack>
       </ScrollView>
 
-      {/* Fixed Bottom Action */}
+      {/* Fixed Bottom Actions */}
       <YStack
         backgroundColor="$background"
         padding="$4"
         borderTopWidth={1}
         borderTopColor="$borderColor"
+        gap="$3"
       >
+        {/* Chat Button */}
         <Button
           size="$5"
           backgroundColor={
@@ -554,12 +609,12 @@ export default function PropertyDetailsModal() {
               ? "$orange10" 
               : isHotProperty(property.likes) 
                 ? "$orange10" 
-                : "$green10"
+                : "$blue10"
           }
           color="white"
           borderRadius="$4"
           fontWeight="600"
-          onPress={() => handleWhatsApp(selectedAgent)}
+          onPress={() => handleStartChat(selectedAgent)}
           shadowColor={
             selectedAgent?.isPremium || isHotProperty(property.likes) 
               ? "#FF4500" 
@@ -574,18 +629,49 @@ export default function PropertyDetailsModal() {
             ) : isHotProperty(property.likes) ? (
               <Ionicons name="flame" size={20} color="white" />
             ) : (
-              <Ionicons name="logo-whatsapp" size={20} color="white" />
+              <Ionicons name="chatbubble" size={20} color="white" />
             )
           }
         >
           {selectedAgent?.isPremium 
-            ? `Falar com ${selectedAgent.name} (Premium)` 
+            ? `Chat com ${selectedAgent.name} (Premium)` 
             : isHotProperty(property.likes) 
-              ? "Imóvel em Alta!" 
-              : "Falar no WhatsApp"
+              ? "Chat - Imóvel em Alta!" 
+              : "Iniciar Conversa"
           }
         </Button>
+
+        {/* WhatsApp Button */}
+        <Button
+          size="$4"
+          backgroundColor="$green10"
+          color="white"
+          borderRadius="$4"
+          fontWeight="600"
+          onPress={() => handleWhatsApp(selectedAgent)}
+          icon={<Ionicons name="logo-whatsapp" size={18} color="white" />}
+        >
+          WhatsApp
+        </Button>
       </YStack>
+
+      {/* Chat Modals */}
+      {property && selectedAgent && user && (
+        <ChatModal
+          visible={showChatModal}
+          onClose={() => setShowChatModal(false)}
+          property={property}
+          agent={selectedAgent}
+          userId={user.id}
+          userName={user.name}
+        />
+      )}
+
+      <ChatListModal
+        visible={showChatListModal}
+        onClose={() => setShowChatListModal(false)}
+        onConversationSelect={handleConversationSelect}
+      />
     </SafeAreaView>
   );
 }

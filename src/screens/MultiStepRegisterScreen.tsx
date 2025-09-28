@@ -436,46 +436,30 @@ export default function MultiStepRegisterScreen() {
                   
                   <Input
                     placeholder="Nome completo"
+                    placeholderTextColor="$gray10"
+                    borderColor="$orange8"
                     value={name}
-                    onChangeText={setName}
+                    onChangeText={(text: any) => setName(text)}
                     autoCapitalize="words"
                   />
                   
                   <Input
                     placeholder="E-mail"
+                    placeholderTextColor="$gray10"
+                    borderColor="$orange8"
                     value={email}
-                    onChangeText={setEmail}
+                    onChangeText={(text: any) => setEmail(text)}
                     keyboardType="email-address"
                     autoCapitalize="none"
                   />
                   
                   <Input
                     placeholder="Telefone (opcional)"
+                    placeholderTextColor="$gray10"
+                    borderColor="$orange8"
                     value={phone}
-                    onChangeText={setPhone}
+                    onChangeText={(text: any) => setPhone(text)}
                     keyboardType="phone-pad"
-                  />
-                </YStack>
-
-                {/* Localização */}
-                <YStack gap="$3">
-                  <Text fontSize="$4" fontWeight="600" color="$color">
-                    Localização
-                  </Text>
-                  
-                  <Input
-                    placeholder="Cidade"
-                    value={city}
-                    onChangeText={setCity}
-                    autoCapitalize="words"
-                  />
-                  
-                  <Input
-                    placeholder="Estado (ex: SP)"
-                    value={state}
-                    onChangeText={setState}
-                    autoCapitalize="characters"
-                    maxLength={2}
                   />
                 </YStack>
 

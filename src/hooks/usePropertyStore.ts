@@ -15,6 +15,7 @@ interface PropertyState {
   nextProperty: () => void;
   likeProperty: (property: Property) => void;
   rejectProperty: (property: Property) => void;
+  toggleFavorite: (property: Property) => void;
   resetStack: () => void;
   setFilters: (filters: PropertyFilters) => void;
   getCurrentProperty: () => Property | null;
@@ -103,6 +104,21 @@ export const usePropertyStore = create<PropertyState>((set, get) => ({
     });
     
     get().nextProperty();
+  },
+
+  toggleFavorite: (property: Property) => {
+    const { favorites } = get();
+    const isAlreadyFavorite = favorites.some(fav => fav.id === property.id);
+    
+    if (isAlreadyFavorite) {
+      // Remove from favorites
+      const updatedFavorites = favorites.filter(fav => fav.id !== property.id);
+      set({ favorites: updatedFavorites });
+    } else {
+      // Add to favorites
+      const updatedFavorites = [...favorites, { ...property, isFavorite: true }];
+      set({ favorites: updatedFavorites });
+    }
   },
 
   resetStack: () => {
